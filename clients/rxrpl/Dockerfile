@@ -5,7 +5,7 @@ FROM rust:1.85-bookworm AS builder
 ARG github=https://github.com/RomThpt/rxrpl.git
 ARG tag=main
 
-RUN apt-get update && apt-get install -y git protobuf-compiler && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git protobuf-compiler clang libclang-dev && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
 RUN git clone --depth 1 --branch $tag $github . || git clone $github . && git checkout $tag
