@@ -3,6 +3,10 @@ ARG tag=develop
 
 FROM --platform=linux/amd64 $baseimage:$tag
 
+# rippleci images run as a non-root user; the build steps below need root
+# to install packages and write to /.
+USER root
+
 # Install python3 for validators.json conversion. rippleci images have
 # been both RHEL- and Debian-based across versions, so try both.
 RUN (apt-get update && apt-get install -y --no-install-recommends python3 && rm -rf /var/lib/apt/lists/*) \

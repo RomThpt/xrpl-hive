@@ -6,7 +6,7 @@ FROM golang:1.24-alpine AS builder
 ARG github=https://github.com/LeJamon/goXRPLd.git
 ARG tag=main
 
-RUN apk add --no-cache git gcc musl-dev
+RUN apk add --no-cache git gcc musl-dev pkgconf openssl-dev openssl-libs-static
 
 WORKDIR /build
 RUN git clone --depth 1 --branch $tag $github . || git clone $github . && git checkout $tag

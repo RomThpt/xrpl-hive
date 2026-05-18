@@ -89,8 +89,11 @@ echo "=== rxrpl config ==="
 cat $CONFIG
 echo "==================="
 
-# Standalone if no bootnodes (smoke test), network otherwise (multi-node sim).
-if [ -z "$XRPL_BOOTNODE" ]; then
+# Standalone only when explicitly requested (smoke test sets XRPL_STANDALONE=1).
+# Every multi-node sim must run in network mode so the P2P listener opens —
+# the first node has no bootnode but still accepts inbound peers and RPC
+# connect commands.
+if [ "${XRPL_STANDALONE:-0}" = "1" ]; then
     MODE="standalone"
 else
     MODE="network"
