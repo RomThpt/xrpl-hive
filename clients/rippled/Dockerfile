@@ -1,5 +1,10 @@
 ARG baseimage=rippleci/rippled
-ARG tag=develop
+# Pinned to the latest stable release tag so the cross-impl simulators are
+# reproducible. `develop` rebuilds frequently and shifts cross-impl behavior
+# (e.g. consensus / propagation regressed silently on 2026-05-21 with the
+# 3.2.0-b0 develop image rebuilt during a rxrpl session). Bump deliberately
+# when a new stable tag is released and re-validate the hive suite.
+ARG tag=3.1.3
 
 FROM --platform=linux/amd64 $baseimage:$tag
 
