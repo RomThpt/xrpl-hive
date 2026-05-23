@@ -65,10 +65,17 @@ func main() {
 			}
 
 			// Wait for all nodes to reach ledger 5.
+			// Cross-impl mixed networks pay an initial peer
+			// handshake + catchup tax (~30-60s) before consensus
+			// rounds can finalize, then average ~12s/ledger in
+			// steady state. 120s leaves no headroom for that
+			// startup phase even though the test only asks for
+			// seq=5; bump to 300s so the timeout only fires on
+			// real failures.
 			ctx := context.Background()
 			for i, node := range nodes {
 				rpc := xrplsim.NewRPCClient(node.RPCEndpoint())
-				if err := rpc.WaitForLedger(ctx, 5, 120*time.Second); err != nil {
+				if err := rpc.WaitForLedger(ctx, 5, 300*time.Second); err != nil {
 					t.Fatalf("node %s did not reach ledger 5: %v", clients[i].Name, err)
 				}
 			}
@@ -86,9 +93,12 @@ func main() {
 			}
 			t.Logf("submitted via %s: %s = %s", clients[0].Name, result.TxHash, result.EngineResult)
 
-			// Wait for propagation.
+			// Wait for propagation. 3 ledgers (5→8) at ~12s/ledger
+			// = ~36s, plus tx propagation + inclusion overhead.
+			// 60s was tight even in steady state; 120s gives the
+			// transaction time to land without falsely tripping.
 			rpc1 := xrplsim.NewRPCClient(nodes[1].RPCEndpoint())
-			if err := rpc1.WaitForLedger(ctx, 8, 60*time.Second); err != nil {
+			if err := rpc1.WaitForLedger(ctx, 8, 120*time.Second); err != nil {
 				t.Fatalf("node %s did not advance: %v", clients[1].Name, err)
 			}
 

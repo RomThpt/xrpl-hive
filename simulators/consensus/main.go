@@ -61,9 +61,18 @@ func main() {
 			// Wait for all nodes to advance to ledger 10.
 			ctx := context.Background()
 			targetSeq := 10
+			// Cross-impl mixed networks pay an initial peer
+			// handshake + catchup tax (rxrpl boots at seq=1 and
+			// must adopt the peer's chain before participating in
+			// consensus rounds), then average ~12s/ledger in
+			// steady state with the default rippled idle interval
+			// of 20s. 120s wasn't enough headroom: the test would
+			// fire its timeout while consensus was actively
+			// advancing. 300s scopes the timeout to "consensus
+			// genuinely stuck" rather than "still warming up".
 			for i, node := range nodes {
 				rpc := xrplsim.NewRPCClient(node.RPCEndpoint())
-				if err := rpc.WaitForLedger(ctx, targetSeq, 120*time.Second); err != nil {
+				if err := rpc.WaitForLedger(ctx, targetSeq, 300*time.Second); err != nil {
 					t.Fatalf("node %s did not reach ledger %d: %v", clients[i].Name, targetSeq, err)
 				}
 			}
