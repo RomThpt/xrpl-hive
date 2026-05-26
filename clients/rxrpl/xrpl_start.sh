@@ -71,6 +71,13 @@ for v in data.get('validators', []):
     print(f'    \"{v}\",')
 " >> $CONFIG
     echo ']' >> $CONFIG
+    # Honor explicit quorum override from the simulator (e.g.
+    # `sync`'s 2-of-3 late-join setup). Without this, rxrpl
+    # defaults to ceil(N * 0.8) which can be unsatisfiable when the
+    # late-joining validator hasn't connected yet.
+    if [ -n "$XRPL_VALIDATION_QUORUM" ]; then
+        echo "quorum = $XRPL_VALIDATION_QUORUM" >> $CONFIG
+    fi
 else
     echo '[validators]' >> $CONFIG
     echo 'enabled = false' >> $CONFIG
